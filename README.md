@@ -2,15 +2,15 @@
 Corso d’interaction design, CV429.01  
 Docenti: A. Gysin, G. Profeta  
 
-Progetto 1: La conquista dello spazio
+Progetto 2: Un piccolo passo per un uomo, un grande balzo per l'umanità
 
-# Titolo progetto
-Autore: Nome Cognome \
-[Titolo progetto](https://github.com/ixd-supsi/2026/tree/main/esempi/es06_array_7)
+# Nasa70 
+Autore: Daniele Falcone \
+[Nasa70](dadiccs.github.io/nasa70/)
 
 
 ## Introduzione e tema
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Congue eu consequat ac felis donec. Nisi est sit amet facilisis magna etiam tempor. Nisl nisi scelerisque eu ultrices vitae. Id aliquet lectus proin nibh nisl. Urna nec tincidunt praesent semper feugiat nibh. Imperdiet dui accumsan sit amet nulla facilisi morbi. Aliquet enim tortor at auctor urna nunc. Id cursus metus aliquam eleifend mi. Ultricies lacus sed turpis tincidunt id aliquet risus feugiat in. Odio morbi quis commodo odio aenean sed. Turpis cursus in hac habitasse. Sed enim ut sem viverra aliquet eget sit. Iaculis at erat pellentesque adipiscing commodo. Et pharetra pharetra massa massa ultricies mi quis hendrerit dolor. At tempor commodo ullamcorper a lacus vestibulum sed arcu. Ipsum faucibus vitae aliquet nec ullamcorper sit. Tempus quam pellentesque nec nam aliquam sem et tortor. Turpis egestas sed tempus urna et pharetra pharetra massa. Ridiculus mus mauris vitae ultricies leo integer malesuada nunc vel.
+NASA 70 è un archivio curatoriale online concepito per celebrare il settantesimo anniversario della NASA attraverso il linguaggio del web design contemporaneo. Il sito raccoglie progetti digitali ispirati allo spazio, all’esplorazione e all’immaginario NASA, trasformando l’anniversario in un’occasione di riflessione culturale e visiva.
 
 
 ## Riferimenti progettuali
@@ -18,9 +18,8 @@ Dolor sit amet consectetur adipiscing elit duis tristique. Sociis natoque penati
 
 
 ## Design dell’interfaccia e modalità di interazione
-Facilisis magna etiam tempor orci eu. Felis donec et odio pellentesque diam volutpat commodo. Dis parturient montes nascetur ridiculus mus mauris vitae. Nisi vitae suscipit tellus mauris a diam maecenas sed enim. Accumsan sit amet nulla facilisi. Ultricies leo integer malesuada nunc vel risus. Est lorem ipsum dolor sit. Ultrices neque ornare aenean euismod elementum nisi. Ultrices mi tempus imperdiet nulla malesuada pellentesque elit eget gravida. Placerat duis ultricies lacus sed turpis tincidunt id aliquet. Arcu dictum varius duis at consectetur lorem donec massa sapien. Pellentesque habitant morbi tristique senectus. Turpis massa sed elementum tempus egestas sed sed risus pretium. Eros donec ac odio tempor orci. Pellentesque id nibh tortor id aliquet lectus. Risus feugiat in ante metus dictum at. Quam pellentesque nec nam aliquam sem et tortor consequat id. Feugiat nibh sed pulvinar proin gravida hendrerit lectus a. Sit amet dictum sit amet justo donec enim.
+L’interfaccia è pensata come uno spazio esplorabile, suddiviso tra una selezione curatoriale e un archivio navigabile. L’interazione principale avviene attraverso filtri dinamici e una calibrazione iniziale basata sugli interessi dell’utente, che guida l’esperienza senza renderla rigida.
 
-https://github.com/user-attachments/assets/38d1768e-a90e-45dd-b12b-1ac0aa1151b3
 
 [<img src="doc/cards.gif" width="500" alt="Magic trick">]()
 
