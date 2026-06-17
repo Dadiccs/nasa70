@@ -22,7 +22,7 @@ La tipografia riflette questo rigore tecnico: il font Inter assicura la leggibil
 L’interfaccia è pensata come uno spazio esplorabile, suddiviso tra una selezione curatoriale e un archivio navigabile. L’interazione principale avviene attraverso filtri dinamici e una calibrazione iniziale basata sugli interessi dell’utente, che guida l’esperienza senza renderla rigida.
 
 
-[<img src="ReadMe_Nasa70_img.jpg" width="500" alt="Nasa70 pagina esplora">]()
+[<img src="ReadMe_Nasa70_img.png" width="500" alt="Nasa70 pagina esplora">]()
 
 
 ## Tecnologia usata
