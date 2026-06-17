@@ -3,1007 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NASA 70 — Explorer Hub</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-
-        /* --- CONFIGURAZIONE CORE LCD RETRO-FUTURISTICO --- */
-        :root {
-            --lcd-bg:   #b8c8d8; /* Sfondo del pannello LCD acceso */
-            --lcd-dark: #1a2535; /* Blu scuro per elementi strutturali primari */
-            --lcd-mid:  #6a8aa8; /* Tonalità intermedia per elementi secondari */
-            --lcd-line: #8aa0b8; /* Colore delle griglie di partizione */
-            --lcd-hi:   #000810; /* Testo e contorni ad alto contrasto */
-            --lcd-sel:  #2a4a6a; /* Colore di selezione e hover dinamici */
-            --font-mono: 'Share Tech Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            --header-height: 110px; /* Altezza dell'header fisso */
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            background-color: var(--lcd-bg);
-            color: var(--lcd-hi);
-            font-family: var(--font-mono);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-        }
-
-        /* Texture a matrice di pixel dell'intero schermo LCD */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(100, 130, 160, 0.08) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(100, 130, 160, 0.08) 1px, transparent 1px);
-            background-size: 4px 4px;
-            pointer-events: none;
-            z-index: 9999;
-        }
-
-        /* --- HEADER FISSO (STICKY INTERFACE) --- */
-        header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: var(--header-height);
-            background-color: var(--lcd-bg);
-            border-bottom: 2px solid var(--lcd-dark);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-sizing: border-box;
-        }
-
-        .header-container {
-            width: 100%;
-            max-width: 1400px;
-            padding: 0 2rem;
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            align-items: center;
-            gap: 2rem;
-            box-sizing: border-box;
-        }
-
-        .header-text h1 {
-            font-size: 2.4rem;
-            font-weight: 700;
-            margin: 0;
-            letter-spacing: -0.01em;
-            color: var(--lcd-hi);
-            line-height: 1.1;
-        }
-
-        .header-text p {
-            margin: 0.3rem 0 0 0;
-            font-size: 1rem;
-            color: var(--lcd-dark);
-            opacity: 0.8;
-        }
-
-        .system-logo {
-            height: 55px;
-            width: auto;
-            display: block;
-            object-fit: contain;
-            image-rendering: pixelated;
-            filter: grayscale(100%) contrast(1.5) brightness(0.95);
-            mix-blend-mode: multiply;
-            opacity: 0.95;
-        }
-
-        .splash-logo-wrapper {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-        }
-        
-        .splash-logo-wrapper .system-logo {
-            height: 90px;
-        }
-
-        .info-trigger {
-            background: transparent;
-            border: 1px solid var(--lcd-dark);
-            color: var(--lcd-dark);
-            font-family: var(--font-mono);
-            font-size: 0.9rem;
-            font-weight: bold;
-            padding: 10px 18px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.2s, color 0.2s;
-            white-space: nowrap;
-        }
-
-        .info-trigger:hover {
-            background: var(--lcd-dark);
-            color: var(--lcd-bg);
-        }
-
-        /* --- CONTENITORE PRINCIPALE --- */
-        main {
-            width: 100%;
-            max-width: 1400px; 
-            padding: calc(var(--header-height) + 2rem) 2rem 2rem 2rem;
-            box-sizing: border-box;
-            z-index: 10;
-        }
-
-        /* --- BARRA DELLE TAB RIGIDE E SOTTILI --- */
-        .navigation-tabs {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            width: 100%;
-            margin-bottom: 3.5rem;
-            border: 1px solid var(--lcd-dark);
-            box-sizing: border-box;
-        }
-
-        .tab-button {
-            background-color: transparent;
-            color: var(--lcd-dark);
-            border: none;
-            border-right: 1px solid var(--lcd-dark); 
-            padding: 10px 0;
-            font-family: var(--font-mono);
-            font-size: 1rem;
-            font-weight: bold;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: background-color 0.15s, color 0.15s;
-            border-radius: 0;
-            text-align: center;
-            box-sizing: border-box;
-        }
-
-        .tab-button:last-child {
-            border-right: none;
-        }
-
-        .tab-button:hover:not(.active) {
-            background-color: rgba(0, 8, 16, 0.06);
-            color: var(--lcd-hi);
-        }
-
-        .tab-button.active {
-            background-color: var(--lcd-dark);
-            color: var(--lcd-bg);
-        }
-
-        /* --- CONTENITORI DELLE VISTE (VIEWPORTS) --- */
-        .view-section {
-            display: none;
-        }
-
-        .view-section.active-view {
-            display: block;
-        }
-
-        .section-title-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 2rem;
-            border-left: 3px solid var(--lcd-dark);
-            padding-left: 10px;
-        }
-
-        .section-title {
-            font-size: 0.95rem;
-            letter-spacing: 0.05em;
-            color: var(--lcd-dark);
-            font-weight: bold;
-            margin: 0;
-        }
-
-        .chart-meta {
-            font-size: 0.9rem;
-            color: var(--lcd-dark);
-            font-weight: bold;
-            opacity: 0.85;
-        }
-
-        /* --- STRUTTURA VISTA 2: FLUSSO LIBERO DEI TAG (SENZA SFONDO/CORNICE) --- */
-        .tags-cloud-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .interactive-tag-chip {
-            background-color: transparent;
-            color: var(--lcd-dark);
-            border: 1px solid var(--lcd-line);
-            padding: 8px 16px;
-            font-family: var(--font-mono);
-            font-size: 0.95rem;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .interactive-tag-chip .tag-count-badge {
-            font-size: 0.8rem;
-            opacity: 0.6;
-            background-color: rgba(0, 8, 16, 0.08);
-            padding: 1px 6px;
-            border-radius: 3px;
-        }
-
-        .interactive-tag-chip:hover {
-            border-color: var(--lcd-dark);
-            background-color: rgba(0, 8, 16, 0.04);
-            color: var(--lcd-hi);
-        }
-
-        .interactive-tag-chip.selected-filter {
-            background-color: var(--lcd-sel);
-            color: #fff;
-            border-color: var(--lcd-sel);
-        }
-        
-        .interactive-tag-chip.selected-filter .tag-count-badge {
-            background-color: rgba(255, 255, 255, 0.2);
-            opacity: 1;
-        }
-
-        /* --- ISTOGRAMMA DEI TAG (VISTA 1) --- */
-        .bar-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 14px;
-            cursor: pointer;
-        }
-
-        .bar-label {
-            width: 200px;
-            text-align: right;
-            padding-right: 25px;
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--lcd-dark);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            transition: color 0.2s;
-        }
-
-        .bar-track {
-            flex-grow: 1;
-            height: 32px;
-            background-color: rgba(0, 8, 16, 0.05);
-            border: 1px solid var(--lcd-line);
-            position: relative;
-            border-radius: 4px;
-            overflow: hidden;
-            transition: border-color 0.2s, background-color 0.2s;
-        }
-
-        .bar-fill {
-            background-color: var(--lcd-dark);
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 15px;
-            color: var(--lcd-bg);
-            font-size: 0.9rem;
-            font-weight: 600;
-            box-sizing: border-box;
-            transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s;
-        }
-
-        .bar-row:hover .bar-label { color: var(--lcd-hi); }
-        .bar-row:hover .bar-track { border-color: var(--lcd-hi); background-color: rgba(0, 8, 16, 0.08); }
-        .bar-row:hover .bar-fill { background-color: var(--lcd-sel); }
-
-        /* --- GRIGLIA CARD RISULTATI --- */
-        #results-section {
-            display: none;
-            padding-top: 3rem;
-            border-top: 2px solid var(--lcd-dark);
-            margin-bottom: 5rem;
-            width: 100%;
-        }
-
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 28px;
-            width: 100%;
-        }
-
-        .card {
-            background-color: rgba(255, 255, 255, 0.15);
-            border: 1px solid var(--lcd-line);
-            border-radius: 6px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.2s, border-color 0.2s, background-color 0.2s;
-            cursor: pointer;
-        }
-
-        .card:hover {
-            transform: translateY(-4px);
-            border-color: var(--lcd-dark);
-            background-color: rgba(255, 255, 255, 0.3);
-        }
-
-        .card-image-wrapper {
-            width: 100%;
-            height: 200px;
-            background-color: transparent;
-            overflow: hidden;
-            position: relative;
-            border-bottom: 1px solid var(--lcd-line);
-        }
-
-        .card-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            image-rendering: pixelated;
-            filter: grayscale(100%) contrast(1.4) brightness(1.05);
-            mix-blend-mode: multiply;
-            opacity: 0.95;
-            transition: transform 0.3s;
-        }
-
-        .card:hover .card-image {
-            transform: scale(1.02);
-        }
-
-        .card-image-wrapper::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.12) 50%);
-            background-size: 100% 3px;
-            z-index: 2;
-        }
-
-        .card-content {
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-        }
-
-        .card h3 {
-            margin: 0 0 10px 0;
-            font-size: 1.3rem;
-            font-weight: bold;
-            line-height: 1.3;
-            color: var(--lcd-hi);
-        }
-
-        .card .meta {
-            font-size: 0.9rem;
-            color: var(--lcd-dark);
-            margin-bottom: 15px;
-        }
-
-        .card .tags {
-            margin-top: auto;
-            margin-bottom: 15px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-
-        .tag-badge {
-            background-color: transparent;
-            color: var(--lcd-dark);
-            padding: 3px 8px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            border-radius: 4px;
-            border: 1px solid var(--lcd-line);
-        }
-
-        /* --- OVERLAY INTRODUTTIVO SISTEMA (SPLASH PAGE) --- */
-        #intro-overlay {
-            display: flex;
-            position: fixed;
-            inset: 0;
-            background-color: var(--lcd-bg);
-            z-index: 5000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        #intro-overlay::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(100, 130, 160, 0.08) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(100, 130, 160, 0.08) 1px, transparent 1px);
-            background-size: 4px 4px;
-            pointer-events: none;
-            z-index: 5001;
-        }
-
-        .intro-container {
-            max-width: 680px;
-            width: 100%;
-            border: 2px solid var(--lcd-dark);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 40px;
-            box-sizing: border-box;
-            z-index: 5002;
-            box-shadow: 0 10px 30px rgba(0, 8, 16, 0.15);
-        }
-
-        .intro-container h2 {
-            margin: 0 0 1.5rem 0;
-            font-size: 1.8rem;
-            color: var(--lcd-hi);
-            border-bottom: 1px solid var(--lcd-line);
-            padding-bottom: 10px;
-            text-align: center;
-        }
-
-        .intro-text {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: var(--lcd-hi);
-            margin-bottom: 2rem;
-        }
-
-        .intro-text ul {
-            margin-top: 0.5rem;
-            padding-left: 20px;
-        }
-
-        .intro-text li {
-            margin-bottom: 8px;
-        }
-
-        .btn-enter {
-            display: block;
-            width: 100%;
-            background-color: var(--lcd-dark);
-            color: var(--lcd-bg);
-            border: 1px solid var(--lcd-dark);
-            padding: 15px;
-            font-family: var(--font-mono);
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: background 0.2s, color 0.2s;
-        }
-
-        .btn-enter:hover {
-            background-color: var(--lcd-sel);
-            color: #fff;
-        }
-
-        /* --- MODAL DETTAGLI --- */
-        #modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(26, 37, 53, 0.4);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            z-index: 6000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .modal-window {
-            background-color: var(--lcd-bg);
-            border: 2px solid var(--lcd-dark);
-            max-width: 700px;
-            width: 100%;
-            max-height: 90vh;
-            border-radius: 8px;
-            overflow-y: auto;
-            position: relative;
-            box-shadow: 0 15px 35px rgba(0,8,16,0.3);
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: var(--lcd-dark);
-            border: 1px solid var(--lcd-dark);
-            color: var(--lcd-bg);
-            font-size: 1.1rem;
-            width: 32px;
-            height: 32px;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 110;
-        }
-
-        .modal-image-wrapper {
-            position: relative;
-            width: 100%;
-            height: 320px;
-            border-bottom: 2px solid var(--lcd-dark);
-        }
-
-        .modal-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            image-rendering: pixelated;
-            filter: grayscale(100%) contrast(1.4) brightness(1.05);
-            mix-blend-mode: multiply;
-            opacity: 0.95;
-        }
-
-        .modal-body {
-            padding: 35px;
-            position: relative;
-            z-index: 10;
-        }
-
-        .modal-body h2 {
-            margin: 0 0 10px 0;
-            font-size: 2rem;
-            color: var(--lcd-hi);
-        }
-
-        .modal-body .modal-meta {
-            font-size: 1rem;
-            color: var(--lcd-dark);
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--lcd-line);
-        }
-
-        .modal-body .description {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: var(--lcd-hi);
-            margin-bottom: 25px;
-        }
-
-        .btn-visit {
-            display: inline-block;
-            background-color: var(--lcd-dark);
-            color: var(--lcd-bg);
-            text-decoration: none;
-            padding: 14px 28px;
-            border-radius: 4px;
-            font-weight: 600;
-            font-size: 1rem;
-            text-align: center;
-            border: 1px solid var(--lcd-dark);
-        }
-
-        .btn-visit:hover {
-            background-color: var(--lcd-sel);
-            color: #fff;
-        }
-    </style>
+    <title>NASA 70 - Collezione Anniversario</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=JetBrains+Mono:wght@300;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="intro-overlay">
-        <div class="intro-container">
-            <div class="splash-logo-wrapper">
-                <img src="Logo/LogoNero.svg" class="system-logo class-target-logo" alt="NASA 70 Logo">
-            </div>
-            <h2>Sistema di esplorazione — NASA 70</h2>
-            <div class="intro-text">
-                <p>Benvenuto nell'Explorer Hub dedicato all'archivio dei progetti del 70° anniversario della NASA.</p>
-                <p>Questo spazio raccoglie e indicizza le produzioni e le analisi documentali catalogate nel sistema. Funziona come una console di monitoraggio dati strutturata:</p>
-                <ul>
-                    <li><strong>Modalità di analisi:</strong> Puoi alternare la visualizzazione tra l'istogramma delle densità macroscopiche e l'indice completo e granulare di tutti i tag d'archivio mediante i due macro-selettori di vista.</li>
-                    <li><strong>Navigazione e Filtro:</strong> Selezionando un tag (dall'istogramma o dall'indice completo), la console estrarrà in tempo reale i progetti pertinenti in ordine cronologico.</li>
-                </ul>
-            </div>
-            <button class="btn-enter" onclick="closeIntro()">Procedi all'esplorazione</button>
-        </div>
-    </div>
-
-    <header>
+    <header class="site-header" id="mainHeader">
         <div class="header-container">
-            <div class="header-logo-wrapper">
-                <img src="Logo/LogoNero.svg" class="system-logo class-target-logo" alt="NASA 70 Logo">
-            </div>
-            <div class="header-text">
-                <h1>NASA 70 — Data Hub</h1>
-                <p>Estensione dell'archivio progetti del settantesimo anniversario.</p>
-            </div>
-            <button class="info-trigger" onclick="openIntro()">Info sistema</button>
+            <a href="#" class="header-logo" onclick="window.location.reload();">
+                <img src="loghi/LogoBianco.svg" alt="NASA Logo" class="logo-image-header">
+            </a>
+            <nav class="header-nav">
+                <span class="nav-link" id="link-featured" onclick="switchActiveView('featured-view')">Esplora</span>
+                <span class="nav-link" id="link-archive" onclick="switchActiveView('archive-view')">Archivio</span>
+            </nav>
         </div>
     </header>
 
-    <main>
-        <nav class="navigation-tabs">
-            <button class="tab-button active" id="tab-chart" onclick="switchView('chart')">Vista Istogramma</button>
-            <button class="tab-button" id="tab-cloud" onclick="switchView('cloud')">Indice Generale Tag</button>
-        </nav>
+    <div class="header-spacer" id="headerSpacer"></div>
 
-        <section id="chart-section" class="view-section active-view">
-            <div class="section-title-container">
-                <h2 class="section-title">Distribuzione dei tag rilevati (Top densità)</h2>
-                <div class="chart-meta" id="chart-meta">Numero di progetti totali: --</div>
-            </div>
-            <div id="chart-container">
-                <p style="color: var(--lcd-dark);">Interrogazione delle API in corso...</p>
-            </div>
-        </section>
+    <section id="landing-page">
+        <div class="landing-top" style="color: var(--nasa-red); margin-bottom: 1.5rem; font-size: 0.9rem;">70° Anniversario NASA &nbsp;&bull;&nbsp; 1958 - 2028</div>
+        <div class="hero-logo-container">
+            <img src="loghi/LogoBianco.svg" alt="NASA 70">
+        </div>
+        <p class="hero-subtitle">
+            Un sito curatoriale nato per raccogliere e valorizzare progetti web ispirati allo spazio e alla NASA, in occasione del settantesimo anniversario dell'esplorazione spaziale.
+        </p>
+        <button class="cta-button" onclick="bypassToFeatured()">Inizia esplorazione</button>
+    </section>
+    
+    <main id="featured-view" class="app-view">
+        <div class="calibration-trigger-box calibration-banner stagger-item">
+            <span style="color: var(--text-dim); font-size: 0.9rem;">Esplorazione guidata</span>
+            <h3>Scopri progetti in base ai tuoi interessi</h3>
+            <p>Rispondi a tre semplici domande per affinare la ricerca e accedere a una selezione di progetti coerente con i tuoi interessi.</p>
+            <button class="cta-button btn-calibrazione" style="font-size: 0.85rem; padding: 1rem 2rem;" onclick="switchToArchiveAndRunQuiz()">Avvia calibrazione</button>
+        </div>
 
-        <section id="cloud-section" class="view-section">
-            <div class="section-title-container">
-                <h2 class="section-title">Indice alfabetico di tutti i metadati d'archivio</h2>
-                <div class="chart-meta" id="cloud-meta">Tag unici mappati: --</div>
-            </div>
-            <div class="tags-cloud-container" id="cloud-container">
-                <p style="color: var(--lcd-dark);">Generazione indice dei tag...</p>
-            </div>
-        </section>
+        <div class="view-section-title stagger-item">
+            <span style="color: var(--nasa-red); font-size: 0.9rem;">Selezione di giugno</span>
+            <h2>Scelti da noi</h2>
+            <p>Tre progetti del mese selezionati direttamente dal nostro team di curatori.</p>
+        </div>
+        <div class="featured-three-column-grid" id="featuredGrid"></div>
 
-        <section id="results-section">
-            <div class="section-title-container">
-                <h2 class="section-title" id="results-title">Selezione archivio</h2>
+        <div class="latest-addition-container stagger-item">
+            <div class="view-section-title">
+                <span style="color: var(--nasa-red); font-size: 0.9rem;">Nuovi arrivi</span>
+                <h2>Ultima aggiunta</h2>
+                <p>L'ultimo progetto caricato all'interno del catalogo storico dell'anniversario.</p>
             </div>
-            <div class="cards-grid" id="cards-container"></div>
-        </section>
+            <div class="latest-addition-3-columns" id="latestAdditionGrid"></div>
+        </div>
     </main>
 
-    <div id="modal-overlay" onclick="closeModal()">
-        <div class="modal-window" onclick="event.stopPropagation()">
-            <button class="modal-close" onclick="closeModal()">✕</button>
-            <div id="modal-content"></div>
+    <main id="archive-view" class="app-view">
+        <div class="calibration-trigger-box calibration-banner">
+            <span style="color: var(--text-dim); font-size: 0.9rem;">Esplorazione guidata</span>
+            <h3>Scopri progetti in base ai tuoi interessi</h3>
+            <p>Rispondi a tre rapide domande per calibrare i filtri di ricerca e generare un sottoinsieme di progetti mirato all'interno del nostro archivio.</p>
+            <button class="cta-button btn-calibrazione" style="font-size: 0.85rem; padding: 1rem 2rem;" onclick="runQuizInsideArchive()">Avvia calibrazione</button>
         </div>
-    </div>
+        
+        <div class="archive-quiz-overlay" id="archiveQuizOverlay">
+            <div class="progress-wrapper"><div class="progress-bar" id="progressBar"></div></div>
+            <span class="step-counter mono" id="stepCounter">Fase 1 di 3</span>
+            <h4 class="wizard-question" id="questionText">Quale aspetto della documentazione ti affascina di più?</h4>
+            <div class="wizard-options" id="optionsContainer"></div>
+        </div>
 
-    <script>
-        // CONFIGURAZIONE URL LOGO DEL PROGETTO
-        const LOGO_URL = 'https://raw.githubusercontent.com/Dadiccs/nasa70/main/loghi/LogoNero.svg';
-
-        const API_URL = 'https://ixd-supsi.github.io/n70api/data.json';
-        const IMAGE_BASE_URL = 'https://ixd-supsi.github.io/n70api/immagini/';
-        let globalData = [];
-        let currentSelectedTag = null; 
-        const MAX_TAGS_TO_SHOW = 12;
-
-        function setupLogos() {
-            const logoElements = document.querySelectorAll('.class-target-logo');
-            logoElements.forEach(img => {
-                if(LOGO_URL && LOGO_URL !== 'URL_DEL_TUO_LOGO') {
-                    img.src = LOGO_URL;
-                    img.style.display = 'block';
-                } else {
-                    img.style.display = 'none'; 
-                }
-            });
-        }
-
-        function switchView(viewType) {
-            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active-view'));
-
-            if(viewType === 'chart') {
-                document.getElementById('tab-chart').classList.add('active');
-                document.getElementById('chart-section').classList.add('active-view');
-            } else if (viewType === 'cloud') {
-                document.getElementById('tab-cloud').classList.add('active');
-                document.getElementById('cloud-section').classList.add('active-view');
-            }
-            
-            updateSelectedTagHighlight();
-        }
-
-        function checkIntroStatus() {
-            const introSeen = sessionStorage.getItem('nasa70_intro_seen');
-            if (introSeen === 'true') {
-                document.getElementById('intro-overlay').style.display = 'none';
-                document.body.style.overflow = 'auto';
-            } else {
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function closeIntro() {
-            document.getElementById('intro-overlay').style.display = 'none';
-            document.body.style.overflow = 'auto';
-            sessionStorage.setItem('nasa70_intro_seen', 'true');
-        }
-
-        function openIntro() {
-            document.getElementById('intro-overlay').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
-
-        async function init() {
-            setupLogos();
-            checkIntroStatus();
-            try {
-                const response = await fetch(API_URL);
-                const data = await response.json();
-                
-                // Mantiene i dati strutturati grezzi per essere estratti liberamente via filtro
-                globalData = Array.isArray(data) ? data : data.projects || Object.values(data);
-
-                document.getElementById('chart-meta').innerText = `Numero di progetti totali: ${globalData.length}`;
-
-                processAndRenderData();
-            } catch (error) {
-                document.getElementById('chart-container').innerHTML = 
-                    `<p style="color:red; font-family:var(--font-mono);">[Errore] Impossibile mappare i flussi di dati: ${error.message}</p>`;
-            }
-        }
-
-        function processAndRenderData() {
-            const tagsCount = {};
-
-            globalData.forEach(item => {
-                if (item.tags && Array.isArray(item.tags)) {
-                    item.tags.forEach(tag => {
-                        const t = tag.trim();
-                        if(t) tagsCount[t] = (tagsCount[t] || 0) + 1;
-                    });
-                }
-            });
-
-            // --- VISTA 1: ISTOGRAMMA ---
-            const sortedTags = Object.keys(tagsCount).sort((a, b) => tagsCount[b] - tagsCount[a]);
-            let displayTags = new Set(sortedTags.slice(0, MAX_TAGS_TO_SHOW));
-
-            globalData.forEach(item => {
-                const itemTags = item.tags || [];
-                if (itemTags.length > 0) {
-                    const hasRepresentedTag = itemTags.some(tag => displayTags.has(tag.trim()));
-                    if (!hasRepresentedTag) {
-                        const bestTagForSite = [...itemTags].sort((a, b) => tagsCount[b] - tagsCount[a])[0];
-                        if(bestTagForSite) displayTags.add(bestTagForSite.trim());
-                    }
-                }
-            });
-
-            const finalTagsArray = Array.from(displayTags).sort((a, b) => tagsCount[b] - tagsCount[a]);
-            const maxCount = tagsCount[finalTagsArray[0]] || 1;
-            renderChart(finalTagsArray, tagsCount, maxCount);
-
-            // --- VISTA 2: FLUSSO COMPLETO ---
-            const allTagsAlphabetical = Object.keys(tagsCount).sort((a, b) => a.localeCompare(b, 'it', { sensitivity: 'base' }));
-            document.getElementById('cloud-meta').innerText = `Tag unici mappati: ${allTagsAlphabetical.length}`;
-            renderTagsCloud(allTagsAlphabetical, tagsCount);
-        }
-
-        function renderChart(tagsArray, tagsCount, maxCount) {
-            const container = document.getElementById('chart-container');
-            container.innerHTML = ''; 
-
-            tagsArray.forEach(tag => {
-                const count = tagsCount[tag];
-                const widthPercent = (count / maxCount) * 100;
-
-                const row = document.createElement('div');
-                row.className = 'bar-row';
-                row.setAttribute('data-tag', tag);
-                row.onclick = () => handleTagSelection(tag);
-
-                row.innerHTML = `
-                    <div class="bar-label" title="${tag}">${tag}</div>
-                    <div class="bar-track">
-                        <div class="bar-fill" style="width: ${Math.max(widthPercent, 4)}%;">
-                            ${count}
-                        </div>
+        <div id="archiveRealContent">
+            <div class="archive-layout">
+                <aside class="archive-sidebar">
+                    <div class="filter-group">
+                        <label>Ricerca libera</label>
+                        <input type="text" id="searchInput" class="search-input" placeholder="Titolo, autore...">
                     </div>
-                `;
-                container.appendChild(row);
-            });
-        }
 
-        function renderTagsCloud(tagsArray, tagsCount) {
-            const container = document.getElementById('cloud-container');
-            container.innerHTML = '';
-
-            tagsArray.forEach(tag => {
-                const count = tagsCount[tag];
-                const chip = document.createElement('button');
-                chip.className = 'interactive-tag-chip';
-                chip.setAttribute('data-tag', tag);
-                chip.onclick = () => handleTagSelection(tag);
-                chip.innerHTML = `${tag} <span class="tag-count-badge">${count}</span>`;
-                
-                container.appendChild(chip);
-            });
-        }
-
-        function handleTagSelection(tag) {
-            currentSelectedTag = tag;
-            updateSelectedTagHighlight();
-            showCardsForTag(tag);
-        }
-
-        function updateSelectedTagHighlight() {
-            document.querySelectorAll('.interactive-tag-chip').forEach(chip => {
-                if(chip.getAttribute('data-tag') === currentSelectedTag) {
-                    chip.classList.add('selected-filter');
-                } else {
-                    chip.classList.remove('selected-filter');
-                }
-            });
-
-            document.querySelectorAll('.bar-row').forEach(row => {
-                const fill = row.querySelector('.bar-fill');
-                if(row.getAttribute('data-tag') === currentSelectedTag) {
-                    if(fill) fill.style.backgroundColor = 'var(--lcd-sel)';
-                    row.querySelector('.bar-label').style.color = 'var(--lcd-hi)';
-                } else {
-                    if(fill) fill.style.backgroundColor = '';
-                    row.querySelector('.bar-label').style.color = '';
-                }
-            });
-        }
-
-        // LOGICA DI FILTRO E ORDINAMENTO STRUTTURATO (DATA DESC + TITOLO ASC SE PARI)
-        function showCardsForTag(selectedTag) {
-            const resultsSection = document.getElementById('results-section');
-            const cardsContainer = document.getElementById('cards-container');
-            const resultsTitle = document.getElementById('results-title');
-
-            // 1. Filtro dei soli progetti che contengono il tag selezionato
-            let filteredData = globalData.filter(item => 
-                item.tags && item.tags.some(tag => tag.trim() === selectedTag)
-            );
-
-            // 2. Ordinamento combinato (Data desc, se identica Titolo asc)
-            filteredData.sort((a, b) => {
-                const dateA = new Date(a.data?.anno || 0, (a.data?.mese || 1) - 1, a.data?.giorno || 1);
-                const dateB = new Date(b.data?.anno || 0, (b.data?.mese || 1) - 1, b.data?.giorno || 1);
-                
-                if (dateB - dateA !== 0) {
-                    return dateB - dateA; // Ordine principale: cronologico decrescente
-                }
-                
-                // Tie-breaker: ordine alfabetico sul titolo se la data coincide perfettamente
-                const titleA = a.titolo || '';
-                const titleB = b.titolo || '';
-                return titleA.localeCompare(titleB, 'it', { sensitivity: 'base' });
-            });
-
-            resultsTitle.innerText = `Tag: ${selectedTag} (${filteredData.length} risultati ordinati per data e titolo)`;
-            cardsContainer.innerHTML = '';
-
-            filteredData.forEach((item) => {
-                const title = item.titolo || 'Progetto senza titolo';
-                const author = item.autore || 'Autore non specificato';
-                
-                const d = item.data;
-                const dateStr = (d && d.giorno) ? `${String(d.giorno).padStart(2, '0')}/${String(d.mese).padStart(2, '0')}/${d.anno}` : 'Data non disponibile';
-                
-                let imgUrl = '';
-                if(item.immagine && item.immagine.length > 0) {
-                    imgUrl = IMAGE_BASE_URL + item.immagine[0];
-                }
-
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.onclick = () => openModal(item);
-                
-                let imageHTML = '';
-                if (imgUrl) {
-                    imageHTML = `
-                        <div class="card-image-wrapper">
-                            <img src="${imgUrl}" class="card-image" alt="Anteprima" onerror="this.parentElement.style.display='none';">
-                        </div>
-                    `;
-                }
-
-                const tagsHTML = item.tags.map(t => `<span class="tag-badge">${t}</span>`).join('');
-
-                card.innerHTML = `
-                    ${imageHTML}
-                    <div class="card-content">
-                        <h3>${title}</h3>
-                        <div class="meta">
-                            <strong>${author}</strong> • ${dateStr}
-                        </div>
-                        <div class="tags">${tagsHTML}</div>
-                        <span class="card-link">Dettagli</span>
+                    <div class="filter-group">
+                        <label>Ordinamento temporale</label>
+                        <select id="dateOrder" class="filter-select">
+                            <option value="desc">Più recenti &darr;</option>
+                            <option value="asc">Meno recenti &uarr;</option>
+                        </select>
                     </div>
-                `;
-                cardsContainer.appendChild(card);
-            });
 
-            resultsSection.style.display = 'block';
-            
-            const yOffset = -160; 
-            const y = resultsSection.getBoundingClientRect().top + window.pageYOffset + yOffset;
-            window.scrollTo({ top: y, behavior: 'smooth' });
-        }
-
-        function openModal(item) {
-            const overlay = document.getElementById('modal-overlay');
-            const content = document.getElementById('modal-content');
-            
-            const title = item.titolo || 'Progetto senza titolo';
-            const author = item.autore || 'Autore non specificato';
-            const description = item.descrizione || 'Nessuna descrizione disponibile per questo progetto.';
-            const url = item.url || '#';
-            
-            const d = item.data;
-            const dateStr = (d && d.giorno) ? `${String(d.giorno).padStart(2, '0')}/${String(d.mese).padStart(2, '0')}/${d.anno}` : 'Data non disponibile';
-
-            let imgUrl = '';
-            if(item.immagine && item.immagine.length > 0) {
-                imgUrl = IMAGE_BASE_URL + item.immagine[0];
-            }
-
-            const tagsHTML = item.tags.map(t => `<span class="tag-badge">${t}</span>`).join('');
-
-            content.innerHTML = `
-                ${imgUrl ? `
-                <div class="modal-image-wrapper">
-                    <img src="${imgUrl}" class="modal-image" alt="Intestazione">
-                </div>` : ''}
-                <div class="modal-body">
-                    <h2>${title}</h2>
-                    <div class="modal-meta">
-                        <strong>Autore:</strong> ${author} <br>
-                        <strong>Data di rilascio:</strong> ${dateStr}
+                    <div class="filter-group">
+                        <label>Filtra per macro categorie</label>
+                        <div class="sidebar-tags-grid" id="sidebarTagsContainer"></div>
                     </div>
-                    <p class="description">${description}</p>
-                    <div class="tags" style="margin-bottom: 25px; display:flex; flex-wrap:wrap; gap:6px;">${tagsHTML}</div>
-                    <a href="${url}" target="_blank" class="btn-visit">Esplora il sito web del progetto</a>
-                </div>
-            `;
 
-            overlay.style.display = 'flex';
-            document.body.style.overflow = 'hidden'; 
-        }
+                    <div class="sidebar-actions">
+                        <button class="action-btn-sidebar btn-show-all" onclick="resetAllFiltersAndCalibrations()">Mostra tutto</button>
+                        <button class="action-btn-sidebar btn-recalibrate" onclick="runQuizInsideArchive()">Ricalibra interessi</button>
+                    </div>
+                </aside>
 
-        function closeModal() {
-            document.getElementById('modal-overlay').style.display = 'none';
-            if(document.getElementById('intro-overlay').style.display !== 'flex') {
-                document.body.style.overflow = 'auto'; 
-            }
-        }
+                <section class="archive-main-content">
+                    <div class="project-grid" id="projectGrid">
+                        <div class="loader">Caricamento dell'archivio...</div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
 
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeModal();
-                if(document.getElementById('intro-overlay').style.display === 'flex') {
-                    closeIntro();
-                }
-            }
-        });
+    <footer class="site-footer" id="mainFooter">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <img src="loghi/LogoBianco.svg" alt="NASA Logo" class="logo-image-footer">
+                <h3>National Aeronautics and Space Administration</h3>
+                <p>NASA esplora l'ignoto nello spazio e nell'atmosfera, innova per il beneficio dell'umanità e ispira il mondo attraverso la scoperta.</p>
+                <p style="font-size:0.8rem; color: var(--nasa-red); margin-top: 0.5rem;">70 Years of Innovation</p>
+            </div>
+            <div class="footer-links-column">
+                <h4>Explore</h4>
+                <ul>
+                    <li><a href="javascript:void(0)">Missions</a></li>
+                    <li><a href="javascript:void(0)">Humans in Space</a></li>
+                    <li><a href="javascript:void(0)">Earth & Climate</a></li>
+                </ul>
+            </div>
+            <div class="footer-links-column">
+                <h4>Science & Research</h4>
+                <ul>
+                    <li><a href="javascript:void(0)">NASA Science</a></li>
+                    <li><a href="javascript:void(0)">Space Technology</a></li>
+                    <li><a href="javascript:void(0)">NASA History</a></li>
+                </ul>
+            </div>
+            <div class="footer-links-column">
+                <h4>Public Affairs</h4>
+                <ul>
+                    <li><a href="javascript:void(0)">News & Media</a></li>
+                    <li><a href="javascript:void(0)">FOIA Privacy</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>&copy; 2026 NASA. Tutti i diritti riservati.</span>
+            <div class="footer-legal-links">
+                <a href="javascript:void(0)">Privacy Policy</a>
+                <a href="javascript:void(0)">Image Guidelines</a>
+            </div>
+        </div>
+    </footer>
 
-        init();
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
