@@ -1,0 +1,1 @@
+L'obiettivo che ho è realizzare una piattaforma curatoriale per raccogliere e valorizzare i progetti dedicati al 70° anniversario della NASA, offrendo un archivio storico razionale e facilmente consultabile attraverso filtri tematici e cronologici
