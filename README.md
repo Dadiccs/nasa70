@@ -4,9 +4,9 @@ Docenti: A. Gysin, G. Profeta
 
 Progetto 2: Un piccolo passo per un uomo, un grande balzo per l'umanità
 
-# Nasa70 
+# Nasa 70 
 Autore: Daniele Falcone \
-[Nasa70](dadiccs.github.io/nasa70/)
+[Nasa 70](dadiccs.github.io/nasa70/)
 
 
 ## Introduzione e tema
